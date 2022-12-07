@@ -1,0 +1,26 @@
+{% extends "layout.html" %} {% block body %}
+{% if session.logged_in %}
+<form action="{{ url_for('add_cv') }}" method=post class=add-cv>
+    <dl>
+        <dt>Name:
+        <dd><input type=text size=30 name=name>
+        <dt>Age:
+        <dd><input type=text size=30 name=age>
+        <dt>Education:
+        <dd><input type=text size=30 name=education>
+        <dt>Work experience:
+        <dd><input type=text size=30 name=work_experience>
+        <dt>Skills:
+        <dd><input type=text size=30 name=skills>
+        <dt>Email:
+        <dd><input type=text size=30 name=email>
+        <dt>Telephone:
+        <dd><input type=text size=30 name=telephone></dd>
+        <br>
+        <dd><input type=submit value="Create a CV" content="0">
+        <dd><input type=submit value="Save as a draft" content="1">
+    </dl>
+</form>
+<a href="{{ url_for('archive') }}">Archive</a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "layout.html" %} {% block body %}
+{% if session.logged_in %}
+<form action="{{ url_for('add_cv') }}" method=post class=add-cv>
+    <dl>
+        <dt>Name:
+        <dd><input type=text size=30 name=name>
+        <dt>Age:
+        <dd><input type=age size=30 name=age>
+        <dt>Telephone:
+        <dd><input type=text size=30 name=telephone></dd>
+        <dd><input type=submit value="Create a CV">
+    </dl>
+</form> {% endif %}
+<ul class=cvs>
+    {% for cv in cvs %}
+    {% if cv.username == session['username'] %}
+    <li><h2>{{ cv.name }}</h2>{{ cv.age|safe }} {{ cv.telephone }} {% endif %} {% else %}
+    <li><em>Unbelievable. No cvs here so far</em> {% endfor %}
+</ul>
+{% endblock %}

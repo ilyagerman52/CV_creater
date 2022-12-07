@@ -1,0 +1,14 @@
+{% extends "layout.html" %} {% block body %}
+{% if session.logged_in %}
+<ul class=cvs>
+    {% for cv in cvs %}
+    {% if cv.username == session['username'] %}
+    <li><a href="/cv_{{ cv.id }}" > Резюме {{ cv.name }}</a>
+        {% endif %}
+        {% else %}
+    <li>No cvs here so far
+    {% endfor %}
+    <h4><a href="/add_cv">Add new CV</a></h4>
+</ul>
+{% endif %}
+{% endblock %}
