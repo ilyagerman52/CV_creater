@@ -1,11 +1,12 @@
 from pdflatex import PDFLaTeX
 
 
-def create_pdf(name='', age='', education=[], work_experience=[], skills=[], email='', tel=''):
-    print(name, age, education, work_experience, skills, email, tel)
+def create_pdf(name='', age='', education=[], work_experience=[], skills=[], email='', tel='', pict=None):
+    print(name, age, education, work_experience, skills, email, tel, pict)
     text = '''
     \\documentclass{article}
     \\usepackage[utf8]{inputenc}
+    \\usepackage{graphicx}
 
     \\title{Resume}
     \\author{ ''' + name + ''' }
@@ -46,6 +47,9 @@ def create_pdf(name='', age='', education=[], work_experience=[], skills=[], ema
             \\item ''' + email + '''
             \\item ''' + tel + '''
         \\end{itemize}
+        
+    \\section{Photo}
+        \\includegraphics[scale=0.8]{ ''' + pict +'''}
     \\end{document}
     '''
 
@@ -55,4 +59,4 @@ def create_pdf(name='', age='', education=[], work_experience=[], skills=[], ema
     pdfl = PDFLaTeX.from_texfile('resume.tex')
     pdf, log, completed_process = pdfl.create_pdf(keep_pdf_file=True, keep_log_file=True)
 
-# create_pdf('Ilya', '19', ['HSE'], ['NO'], ['programming', 'maths', 'thinking'], 'ivgerman@edu.hse.ru', '89056660346')
+# create_pdf('Petrov Timur', '88', ['HSE'], ['Ozon', 'Parrot farm', 'HSE'], ['Python', 'Parrot distinguishability'], 'tpetrov@hse.ru', '27269', 'photo.jpg')

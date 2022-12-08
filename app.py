@@ -3,13 +3,9 @@ import os
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash, send_file
 from cv_pdf import create_pdf
 
-# конфигурация
-
 DATABASE = '/tmp/flaskr.db'
 DEBUG = True
 SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
 users = {'admin': 'default', 'test': 'test'}
 
 app = Flask(__name__)
@@ -18,38 +14,32 @@ app.config.from_object(__name__)
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'flaskr.db'),
     DEBUG=True,
-    SECRET_KEY='development key',
-    USERNAME='admin',
-    PASSWORD='default'))
+    SECRET_KEY='development key'))
 
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
 def connect_db():
-    """Соединяет с указанной базой данных."""
     rv = sqlite3.connect(
-        app.config['DATABASE'])  # внутри конфигураций надо будет указать БД, в которую мы будем все хранить
-    rv.row_factory = sqlite3.Row  # инстанс для итерации по строчкам (может брать по строке и выдавать)
+        app.config['DATABASE'])
+    rv.row_factory = sqlite3.Row
     return rv
 
 
 def get_db():
-    """Если ещё нет соединения с базой данных, открыть новое - для текущего контекста приложения"""
-    if not hasattr(g, 'sqlite_db'):  # g - это наша глобальная переменная, являющасяс объектом отрисовки
+    if not hasattr(g, 'sqlite_db'):
         g.sqlite_db = connect_db()
     return g.sqlite_db
 
 
-@app.teardown_appcontext  # декоратор при разрыве connection
-def close_db(error):  # закрытие может проходить как нормально, так и с ошибкой, которую можно обрабатывать
-    """Закрываем БД при разрыве"""
+@app.teardown_appcontext
+def close_db(error):
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
 
 
 def init_db():
-    """Инициализируем наше БД"""
-    with app.app_context():  # внутри app_context app и g связаны
+    with app.app_context():
         db = get_db()
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
@@ -108,7 +98,7 @@ def archive():
     db = get_db()
     cur = db.execute(
         'select id, username, name, age, education, work_experience, '
-        'skills, email, telephone from cvs order by id desc')
+        'skills, email, telephone, image from cvs order by id desc')
     cvs = cur.fetchall()
     return render_template('archive.html', cvs=cvs)
 
@@ -121,9 +111,10 @@ def add_cv():
         db = get_db()
         db.execute(
             'insert into cvs (username, name, age, education, work_experience, '
-            'skills, email, telephone) values (?,?,?,?,?,?,?,?)',
+            'skills, email, telephone, image) values (?,?,?,?,?,?,?,?,?)',
             [session['username'], request.form['name'], request.form['age'], request.form['education'],
-             request.form['work_experience'], request.form['skills'], request.form['email'], request.form['telephone']])
+             request.form['work_experience'], request.form['skills'], request.form['email'], request.form['telephone'],
+             request.form['image']])
         db.commit()
         flash('New cv was successfully posted')
 
@@ -137,7 +128,7 @@ def one_cv(id):
     db = get_db()
     cur = db.execute(
         f'select id, username, name, age, education, work_experience, skills, email,'
-        f' telephone from cvs where id="{id}" order by id desc')
+        f' telephone, image from cvs where id="{id}" order by id desc')
     cv = cur.fetchall()
     return render_template('cv_number.html', cv=cv)
 
@@ -147,7 +138,7 @@ def download_cv(id):
     db = get_db()
     cur = db.execute(
         f'select id, username, name, age, education, work_experience, skills, email,'
-        f' telephone from cvs where id="{id}" order by id desc')
+        f' telephone, image from cvs where id="{id}" order by id desc')
     cv = cur.fetchall()
     print(cv)
     name = str(cv[0]['name'])
@@ -157,6 +148,8 @@ def download_cv(id):
     skills = map(str, cv[0]['skills'].split(','))
     email = str(cv[0]['email'])
     tel = str(cv[0]['telephone'])
+    pict = cv[0]['image']
+    print(pict)
     create_pdf(
         name=name,
         age=age,
@@ -164,9 +157,11 @@ def download_cv(id):
         work_experience=work_experience,
         skills=skills,
         email=email,
-        tel=tel
+        tel=tel,
+        pict=pict
     )
     return send_file('resume.pdf')
+
 
 if __name__ == '__main__':
     init_db()

@@ -8,5 +8,6 @@ create table cvs (
     work_experience text,
     skills text,
     email text,
-    telephone integer
+    telephone integer,
+    image picture
 );
